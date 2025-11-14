@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Studio Premium - 9:16 Master</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Lucide Icons for aesthetic UI -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom font and base styling */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+
+        /* --- 3D MODERN PREMIUM STYLING --- */
+        .ai-bg {
+            /* Deep Purple/Blue Gradient with ambient light */
+            background: radial-gradient(circle at 50% 0%, rgba(55, 48, 87, 0.9) 0%, rgba(26, 26, 46, 1) 35%, #1a1a2e 100%);
+            color: #d1d5db; /* Light gray text */
+        }
+        .ai-card {
+            /* Glassmorphic/Floating Card Effect */
+            background-color: rgba(44, 42, 62, 0.6); /* Semi-transparent */
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.4), /* Deep outer shadow for floating effect */
+                0 0 0 1px rgba(255, 255, 255, 0.03); /* Subtle light rim */
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .ai-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        /* Active/Accent Color */
+        .ai-accent { background-color: #00bcd4; } /* Cyan/Teal accent */
+
+        /* Input/Textarea - Soft inset effect */
+        .ai-input {
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4); /* Inset shadow for depth */
+        }
+        .ai-input:focus {
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6), 0 0 0 2px #00bcd4; /* Accent ring on focus */
+        }
+
+        /* Buttons/Interactions */
+        .ai-button {
+            background: linear-gradient(145deg, #00bcd4, #0097a7);
+            color: #1a1a2e;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(0, 188, 212, 0.5);
+            transition: all 0.2s;
+        }
+        .ai-button:hover {
+            background: linear-gradient(145deg, #00d4e9, #00a7b8);
+            box-shadow: 0 6px 15px rgba(0, 188, 212, 0.6);
+            transform: translateY(-1px);
+        }
+
+        /* Sidebar Items - Clay/Pill button style */
+        .ai-sidebar-item {
+            background-color: transparent;
+            color: #d1d5db;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3); /* Soft inner shadow */
+        }
+        .ai-sidebar-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        .ai-active-tab {
+            background: linear-gradient(145deg, #00bcd4, #0097a7) !important;
+            color: #1a1a2e !important;
+            font-weight: 700;
+            box-shadow: 0 4px 10px rgba(0, 188, 212, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.2) !important;
+            transform: translateY(-1px);
+        }
+        
+        /* Custom styling for output frames */
+        .aspect-9-16 {
+            width: 100%;
+            padding-top: 177.77%; 
+            position: relative;
+            overflow: hidden;
+            background-color: #2c2a3e;
+            border: 2px dashed #00bcd4;
+            border-radius: 0.75rem;
+        }
+        .aspect-square {
+            width: 100%;
+            padding-top: 100%;
+            position: relative;
+            overflow: hidden;
+            background-color: #2c2a3e;
+            border: 2px dashed #00bcd4;
+            border-radius: 0.75rem;
+        }
+
+        .aspect-9-16 img,
+        .aspect-9-16 video,
+        .aspect-9-16 .content-placeholder,
+        .aspect-square img,
+        .aspect-square video,
+        .aspect-square .content-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0.5rem;
+        }
+        .dropzone {
+            border: 2px dashed #00bcd4;
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .dropzone.drag-over {
+            border-color: #ffcc00;
+            background-color: rgba(0, 188, 212, 0.1);
+        }
+        .output-container {
+            max-width: 400px; 
+            margin: 0 auto;
+        }
+        .loading-ring {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #00bcd4;
+            border-radius: 50%;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- LAYOUT OPTIMIZATION --- */
+        body { margin: 0; padding: 0; }
+        .flex-1 { min-height: 100vh; }
+        .main-content-area { padding: 0; }
+        .content-padding { padding: 1.5rem; }
+        .main-content-scroll { overflow-y: auto; height: 100vh; }
+
+    </style>
+    <!-- Three.js for visual placeholder/effect in the output area (optional, but good for aesthetics) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body class="ai-bg text-gray-100 min-h-screen">
+
+    <!-- Main Container -->
+    <div class="flex flex-col md:flex-row min-h-screen">
+        
+        <!-- Sidebar / Navigation -->
+        <nav id="nav-sidebar" class="w-full md:w-64 ai-card content-padding flex flex-col md:flex-shrink-0 border-r border-gray-700/20">
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-2xl font-bold text-gray-50 drop-shadow-lg">PUPUT STUDIO</h1>
+                <button class="md:hidden text-gray-400 hover:text-white" onclick="document.getElementById('nav-menu').classList.toggle('hidden')">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <!-- Navigation Menu (Hidden on mobile by default) -->
+            <div id="nav-menu" class="hidden md:block">
+                <div class="space-y-3">
+                    <!-- Tool Buttons -->
+                    <button class="ai-sidebar-item w-full flex items-center content-padding py-3 rounded-xl text-left hover:bg-gray-600/20 transition duration-150" data-tool="voice-over-assistant" onclick="showTool('voice-over-assistant')">
+                        <i data-lucide="mic" class="w-5 h-5 mr-3 text-fuchsia-400 drop-shadow-md"></i> Asisten Voice Over
+                    </button>
+                    <button class="ai-sidebar-item w-full flex items-center content-padding py-3 rounded-xl text-left hover:bg-gray-600/20 transition duration-150" data-tool="text-to-image" onclick="showTool('text-to-image')">
+                        <i data-lucide="image-up" class="w-5 h-5 mr-3 text-cyan-400 drop-shadow-md"></i> Text ke Gambar
+                    </button>
+                    <button class="ai-sidebar-item w-full flex items-center content-padding py-3 rounded-xl text-left hover:bg-gray-600/20 transition duration-150" data-tool="image-to-prompt" onclick="showTool('image-to-prompt')">
+                        <i data-lucide="file-image" class="w-5 h-5 mr-3 text-yellow-400 drop-shadow-md"></i> Gambar ke Prompt
+                    </button>
+                    <button class="ai-sidebar-item w-full flex items-center content-padding py-3 rounded-xl text-left hover:bg-gray-600/20 transition duration-150" data-tool="text-to-audio" onclick="showTool('text-to-audio')">
+                        <i data-lucide="volume-2" class="w-5 h-5 mr-3 text-pink-400 drop-shadow-md"></i> Text ke Suara
+                    </button>
+                    <button class="ai-sidebar-item w-full flex items-center content-padding py-3 rounded-xl text-left hover:bg-gray-600/20 transition duration-150" data-tool="hashtag-generator" onclick="showTool('hashtag-generator')">
+                        <i data-lucide="hash" class="w-5 h-5 mr-3 text-lime-400 drop-shadow-md"></i> Generator Hashtag
+                    </button>
+                    <button class="ai-sidebar-item w-full flex items-center content-padding py-3 rounded-xl text-left hover:bg-gray-600/20 transition duration-150" data-tool="style-changer" onclick="showTool('style-changer')">
+                        <i data-lucide="user-cog" class="w-5 h-5 mr-3 text-orange-400 drop-shadow-md"></i> Ubah Gaya Model
+                    </button>
+                    <!-- NEW FEATURE: Meme Pro -->
+                    <button class="ai-sidebar-item w-full flex items-center content-padding py-3 rounded-xl text-left hover:bg-gray-600/20 transition duration-150" data-tool="meme-pro" onclick="showTool('meme-pro')">
+                        <i data-lucide="laugh" class="w-5 h-5 mr-3 text-red-300 drop-shadow-md"></i> Meme Pro
+                    </button>
+                    <!-- END NEW FEATURE -->
+                    <button class="ai-sidebar-item w-full flex items-center content-padding py-3 rounded-xl text-left hover:bg-gray-600/20 transition duration-150" data-tool="auto-content" onclick="showTool('auto-content')">
+                        <i data-lucide="activity" class="w-5 h-5 mr-3 text-purple-400 drop-shadow-md"></i> Konten Otomatis
+                    </button>
+                    <button class="ai-sidebar-item w-full flex items-center content-padding py-3 rounded-xl text-left ai-active-tab transition duration-150" data-tool="ugc-affiliate" onclick="showTool('ugc-affiliate')">
+                        <i data-lucide="tag" class="w-5 h-5 mr-3 text-red-400 drop-shadow-md"></i> Afiliasi UGC
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 main-content-area main-content-scroll">
+
+            <!-- Tool Header -->
+            <header class="flex justify-between items-center content-padding border-b border-gray-700/20 sticky top-0 z-10 ai-bg">
+                <h2 id="tool-title" class="text-3xl font-extrabold text-white drop-shadow-lg">Selamat Datang di AI Content Studio</h2>
+                <div class="flex space-x-3 text-gray-400">
+                    <button onclick="location.reload()" title="Refresh"><i data-lucide="rotate-ccw" class="w-6 h-6 hover:text-white transition drop-shadow-md"></i></button>
+                </div>
+            </header>
+
+            <!-- Tool Modules Container -->
+            <div id="tool-modules" class="space-y-12 content-padding">
+
+                <!-- 8. Asisten Voice Over -->
+                <section id="voice-over-assistant" class="tool-module ai-card content-padding rounded-3xl hidden">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center text-white drop-shadow-md"><i data-lucide="mic" class="w-6 h-6 mr-2 text-fuchsia-400"></i> Asisten Voice Over</h3>
+                    <p class="text-gray-400 mb-6">Asisten AI khusus untuk membuat naskah narasi yang alami, hangat, profesional, dan siap dibacakan oleh narator wanita (gaya TikTok/YouTube).</p>
+                    
+                    <textarea id="voa-prompt" class="ai-input w-full border-none rounded-xl p-3 h-32 text-white placeholder-gray-400" placeholder="Masukkan permintaan Anda (e.g., jelaskan 3 keunggulan produk ini, buat naskah pembuka video tentang AI)..."></textarea>
+                    
+                    <button onclick="generateVoiceOver('voa')" class="ai-button w-full mt-6 px-6 py-3 rounded-xl font-semibold flex items-center justify-center">
+                        <i data-lucide="script" class="w-5 h-5 mr-2"></i> Buat Naskah Narasi Voice Over
+                    </button>
+                    
+                    <div id="voa-output" class="mt-8">
+                        <label for="voa-script-output" class="block text-xl font-medium text-gray-200 mb-2">Naskah Voice Over Final:</label>
+                        <textarea id="voa-script-output" class="ai-input w-full border-none rounded-xl p-4 h-64 text-white placeholder-gray-400" readonly placeholder="Naskah voice over akan muncul di sini..."></textarea>
+                        <button onclick="copyToClipboard(document.getElementById('voa-script-output').innerText)" class="text-xs text-cyan-400 hover:text-cyan-200 mt-2 flex items-center">
+                            <i data-lucide="copy" class="w-4 h-4 mr-1"></i> Salin Naskah
+                        </button>
+                    </div>
+                    <div id="voa-status" class="mt-4 text-center text-cyan-400 font-medium hidden"></div>
+                </section>
+
+                <!-- 1. Text ke Gambar -->
+                <section id="text-to-image" class="tool-module ai-card content-padding rounded-3xl hidden">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center text-white drop-shadow-md"><i data-lucide="image-up" class="w-6 h-6 mr-2 text-cyan-400"></i> Text ke Gambar</h3>
+                    <p class="text-gray-400 mb-6">Buat hingga 4 gambar sinematik vertikal (9:16) berkualitas tertinggi dari deskripsi Anda.</p>
+                    <textarea id="t2i-prompt" class="ai-input w-full border-none rounded-xl p-3 h-24 text-white placeholder-gray-400" placeholder="Deskripsi gambar premium Anda..."></textarea>
+                    
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mt-4 items-center">
+                        <div class="w-full sm:w-auto">
+                            <label for="t2i-aspect" class="block text-sm font-medium text-gray-300">Rasio Aspek (Wajib Stabil)</label>
+                            <select id="t2i-aspect" class="ai-input w-full border-none rounded-xl p-2.5 text-white" disabled>
+                                <option value="9:16">Potret (9:16) - ULTRA STABIL</option>
+                            </select>
+                        </div>
+                        <div class="w-full sm:w-auto">
+                            <label for="t2i-count" class="block text-sm font-medium text-gray-300">Jumlah Gambar</label>
+                            <input type="range" id="t2i-count" min="1" max="4" value="1" oninput="document.getElementById('t2i-count-val').innerText=this.value" class="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer range-lg">
+                            <span id="t2i-count-val" class="text-sm text-gray-300 block text-center mt-1">1</span>
+                        </div>
+                        <button onclick="generateImage('t2i')" class="ai-button w-full sm:w-auto mt-6 sm:mt-0 px-6 py-3 rounded-xl font-semibold flex items-center justify-center">
+                            <i data-lucide="sparkles" class="w-5 h-5 mr-2"></i> Buat Gambar Premium
+                        </button>
+                    </div>
+
+                    <div id="t2i-output" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                        <!-- Image output will appear here -->
+                    </div>
+                    <div id="t2i-status" class="mt-4 text-center text-cyan-400 font-medium hidden"></div>
+                </section>
+
+                <!-- 2. Gambar ke Prompt -->
+                <section id="image-to-prompt" class="tool-module ai-card content-padding rounded-3xl hidden">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center text-white drop-shadow-md"><i data-lucide="file-image" class="w-6 h-6 mr-2 text-yellow-400"></i> Gambar ke Prompt</h3>
+                    <p class="text-gray-400 mb-6">Unggah gambar, dan AI akan membuat deskripsi prompt yang sangat detail, faktual, dan lengkap untuk re-generasi 9:16.</p>
+                    
+                    <div id="i2p-dropzone" class="dropzone ai-card content-padding text-center rounded-xl cursor-pointer hover:scale-[1.01]" onclick="document.getElementById('i2p-file').click()">
+                        <i data-lucide="upload-cloud" class="w-8 h-8 mx-auto text-cyan-400 mb-2 drop-shadow-lg"></i>
+                        <p class="text-gray-300">Seret & lepas gambar di sini atau klik untuk memilih file</p>
+                        <input type="file" id="i2p-file" accept="image/*" class="hidden">
+                    </div>
+                    <div id="i2p-preview" class="mt-4 output-container hidden">
+                        <p class="text-gray-300 mb-2">Pratinjau Gambar:</p>
+                        <img id="i2p-preview-img" class="w-full rounded-xl object-contain h-auto max-h-96 border border-gray-600/30" alt="Image Preview">
+                    </div>
+
+                    <button onclick="generatePrompt('i2p')" class="ai-button w-full mt-6 px-6 py-3 rounded-xl font-semibold flex items-center justify-center">
+                        <i data-lucide="bot" class="w-5 h-5 mr-2"></i> Buat Prompt Analitis
+                    </button>
+                    
+                    <div id="i2p-output" class="mt-8">
+                        <label for="i2p-prompt-output" class="block text-xl font-medium text-gray-200 mb-2">Prompt Hasil Analisis:</label>
+                        <textarea id="i2p-prompt-output" class="ai-input w-full border-none rounded-xl p-4 h-48 text-white placeholder-gray-400" readonly placeholder="Hasil analisis akan muncul di sini..."></textarea>
+                    </div>
+                    <div id="i2p-status" class="mt-4 text-center text-cyan-400 font-medium hidden"></div>
+                </section>
+
+                <!-- 3. Text ke Suara -->
+                <section id="text-to-audio" class="tool-module ai-card content-padding rounded-3xl hidden">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center text-white drop-shadow-md"><i data-lucide="volume-2" class="w-6 h-6 mr-2 text-pink-400"></i> Text ke Suara</h3>
+                    <p class="text-gray-400 mb-6">Aktifkan modul kualitas audio paling profesional: pelafalan natural, intonasi stabil, dan noise reduction penuh.</p>
+                    
+                    <textarea id="t2a-text" class="ai-input w-full border-none rounded-xl p-3 h-24 text-white placeholder-gray-400" placeholder="Masukkan teks yang ingin diubah menjadi suara..."></textarea>
+                    
+                    <div class="flex space-x-4 mt-4">
+                        <div class="w-1/2">
+                            <label for="t2a-style" class="block text-sm font-medium text-gray-300">Gaya Ekspresi (Contoh)</label>
+                            <select id="t2a-style" class="ai-input w-full border-none rounded-xl p-2.5 text-white">
+                                <option value="cheerfully">Ceria (Cheerfully)</option>
+                                <option value="calmly">Tenang (Calmly)</option>
+                                <option value="dramatically">Dramatis (Dramatically)</option>
+                                <option value="whispering">Berbisik (Whispering)</option>
+                            </select>
+                        </div>
+                        <div class="w-1/2">
+                            <label for="t2a-voice" class="block text-sm font-medium text-gray-300">Pilih Suara (Kore default)</label>
+                            <select id="t2a-voice" class="ai-input w-full border-none rounded-xl p-2.5 text-white" disabled>
+                                <option value="Kore">Kore (Informative/Firm)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button onclick="generateAudio('t2a')" class="ai-button w-full mt-6 px-6 py-3 rounded-xl font-semibold flex items-center justify-center">
+                        <i data-lucide="music-4" class="w-5 h-5 mr-2"></i> Buat Audio Profesional
+                    </button>
+                    
+                    <div id="t2a-output" class="mt-8 text-center">
+                        <p class="text-gray-300 mb-2">Hasil Audio:</p>
+                        <audio id="t2a-audio-player" controls class="w-full rounded-xl bg-gray-700/50 hidden"></audio>
+                    </div>
+                    <div id="t2a-status" class="mt-4 text-center text-cyan-400 font-medium hidden"></div>
+                </section>
+
+                <!-- 4. Generator Hashtag -->
+                <section id="hashtag-generator" class="tool-module ai-card content-padding rounded-3xl hidden">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center text-white drop-shadow-md"><i data-lucide="hash" class="w-6 h-6 mr-2 text-lime-400"></i> Generator Hashtag</h3>
+                    <p class="text-gray-400 mb-6">Perencana Hashtag AI: Hasilkan strategi hashtag yang terstruktur dan dikelompokkan berdasarkan tingkat persaingan (Tinggi, Sedang, Rendah).</p>
+                    
+                    <input type="text" id="hgen-topic" class="ai-input w-full border-none rounded-xl p-3 text-white placeholder-gray-400" placeholder="Masukkan topik konten Anda (e.g., resep kue modern, wisata bali hidden gems)...">
+                    
+                    <button onclick="generateHashtags('hgen')" class="ai-button w-full mt-6 px-6 py-3 rounded-xl font-semibold flex items-center justify-center">
+                        <i data-lucide="trending-up" class="w-5 h-5 mr-2"></i> Buat Strategi Hashtag
+                    </button>
+                    
+                    <div id="hgen-output" class="mt-8 space-y-4">
+                        <!-- Hashtag output will appear here -->
+                    </div>
+                    <div id="hgen-status" class="mt-4 text-center text-cyan-400 font-medium hidden"></div>
+                </section>
+
+                <!-- 5. Ubah Gaya Model -->
+                <section id="style-changer" class="tool-module ai-card content-padding rounded-3xl hidden">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center text-white drop-shadow-md"><i data-lucide="user-cog" class="w-6 h-6 mr-2 text-orange-400"></i> Ubah Gaya Model</h3>
+                    <p class="text-gray-400 mb-6">Aktifkan stabilisasi identitas wajah tingkat tinggi (100% konsisten) saat berganti gaya atau angle, wajib 9:16.</p>
+                    
+                    <div id="sc-dropzone" class="dropzone ai-card content-padding text-center rounded-xl cursor-pointer hover:scale-[1.01]" onclick="document.getElementById('sc-file').click()">
+                        <i data-lucide="user-plus" class="w-8 h-8 mx-auto text-cyan-400 mb-2 drop-shadow-lg"></i>
+                        <p class="text-gray-300">Seret & lepas gambar model di sini</p>
+                        <input type="file" id="sc-file" accept="image/*" class="hidden">
+                    </div>
+                    <div id="sc-preview" class="mt-4 output-container hidden">
+                        <p class="text-gray-300 mb-2">Model Asli:</p>
+                        <div class="aspect-9-16 w-1/3 mx-auto"><img id="sc-preview-img" class="object-cover" alt="Original Model"></div>
+                    </div>
+                    
+                    <textarea id="sc-style-prompt" class="ai-input w-full border-none rounded-xl p-3 h-20 text-white placeholder-gray-400 mt-6" placeholder="Masukkan gaya dan background baru (e.g., di depan menara eiffel, studio neon cyberpunk)..."></textarea>
+                    
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4 mt-4 items-center">
+                        <div class="w-full sm:w-1/2">
+                            <label for="sc-count" class="block text-sm font-medium text-gray-300">Jumlah Variasi</label>
+                            <input type="range" id="sc-count" min="1" max="4" value="2" oninput="document.getElementById('sc-count-val').innerText=this.value" class="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer range-lg">
+                            <span id="sc-count-val" class="text-sm text-gray-300 block text-center mt-1">2</span>
+                        </div>
+                        <button onclick="changeStyle('sc')" class="ai-button w-full sm:w-1/2 mt-6 sm:mt-0 px-6 py-3 rounded-xl font-semibold flex items-center justify-center">
+                            <i data-lucide="layout-grid" class="w-5 h-5 mr-2"></i> Ubah Gaya (Wajah Stabil)
+                        </button>
+                    </div>
+
+                    <div id="sc-output" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                        <!-- Style change output will appear here -->
+                    </div>
+                    <div id="sc-status" class="mt-4 text-center text-cyan-400 font-medium hidden"></div>
+                </section>
+                
+                <!-- 6. MEME PRO (NEW FEATURE) -->
+                <section id="meme-pro" class="tool-module ai-card content-padding rounded-3xl hidden">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center text-white drop-shadow-md"><i data-lucide="laugh" class="w-6 h-6 mr-2 text-red-300"></i> Meme Pro - Generator Otomatis</h3>
+                    <p class="text-gray-400 mb-6">Buat meme viral. Unggah gambar untuk *caption* lucu (Image-to-Meme) atau berikan *prompt* untuk gambar meme baru (Text-to-Meme).</p>
+                    
+                    <!-- Inputs -->
+                    <textarea id="mp-prompt" class="ai-input w-full border-none rounded-xl p-3 h-20 text-white placeholder-gray-400 mb-4" placeholder="Masukkan ide atau konteks meme Anda..."></textarea>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <!-- Dropzone for Image-to-Meme -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Gambar Referensi (Opsional)</label>
+                            <div id="mp-dropzone" class="dropzone ai-card p-4 text-center rounded-xl cursor-pointer hover:scale-[1.01]" onclick="document.getElementById('mp-file').click()">
+                                <i data-lucide="camera" class="w-6 h-6 mx-auto text-yellow-400 mb-1 drop-shadow-lg"></i>
+                                <p class="text-gray-300 text-sm">Drag/Klik Gambar untuk di-Caption</p>
+                                <input type="file" id="mp-file" accept="image/*" class="hidden">
+                            </div>
+                        </div>
+                        
+                        <!-- Meme Template/Aspect Ratio -->
+                        <div>
+                            <label for="mp-template" class="block text-sm font-medium text-gray-300 mb-2">Gaya Meme / Rasio Aspek</label>
+                            <select id="mp-template" class="ai-input w-full border-none rounded-xl p-2.5 text-white">
+                                <option value="9:16">Vertical TikTok Meme (9:16)</option>
+                                <option value="1:1">Square Observational Meme (1:1)</option>
+                                <option value="Drake Hotline Bling Style">Drake Hotline Bling Style</option>
+                                <option value="Wholesome Cat Template">Wholesome Cat Meme</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button onclick="generateMeme('mp')" class="ai-button w-full mt-2 px-6 py-3 rounded-xl font-semibold flex items-center justify-center">
+                        <i data-lucide="zap" class="w-5 h-5 mr-2"></i> Buat Meme Lucu
+                    </button>
+                    
+                    <!-- Output -->
+                    <div id="mp-output-container" class="mt-8 space-y-6 hidden">
+                        <div id="mp-caption-output" class="p-4 ai-card rounded-xl border-l-4 border-fuchsia-500">
+                            <h4 class="text-lg font-semibold text-fuchsia-400 mb-2 drop-shadow-md">Caption Meme:</h4>
+                            <p id="mp-caption-text" class="text-gray-200 italic text-base"></p>
+                            <button onclick="copyToClipboard(document.getElementById('mp-caption-text').innerText)" class="text-xs text-cyan-400 hover:text-cyan-200 mt-2 flex items-center">
+                                <i data-lucide="copy" class="w-4 h-4 mr-1"></i> Salin Caption
+                            </button>
+                        </div>
+                        
+                        <div class="output-container">
+                            <p class="text-gray-300 mb-2">Visual Meme:</p>
+                            <div id="mp-image-wrapper" class="group relative rounded-xl overflow-hidden shadow-2xl">
+                                <!-- Image goes here -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="mp-status" class="mt-4 text-center text-cyan-400 font-medium hidden"></div>
+                </section>
+                <!-- END NEW FEATURE -->
+
+                <!-- 6. Konten Otomatis -->
+                <section id="auto-content" class="tool-module ai-card content-padding rounded-3xl hidden">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center text-white drop-shadow-md"><i data-lucide="activity" class="w-6 h-6 mr-2 text-purple-400"></i> Konten Otomatis</h3>
+                    <p class="text-gray-400 mb-6">Engine pembuatan alur cerita otomatis dengan logika kuat, karakter **wajah terkunci**, dan transisi visual harmonis (9:16).</p>
+                    
+                    <input type="text" id="ac-title" class="ai-input w-full border-none rounded-xl p-3 h-24 text-white placeholder-gray-400" placeholder="Masukkan Judul (e.g., Tutorial memasak nasi, Perjalanan ke gunung bromo)...">
+
+                    <div class="flex space-x-4 mt-4">
+                        <div class="w-1/2">
+                            <label for="ac-count" class="block text-sm font-medium text-gray-300">Jumlah Adegan</label>
+                            <input type="range" id="ac-count" min="2" max="6" value="4" oninput="document.getElementById('ac-count-val').innerText=this.value" class="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer range-lg">
+                            <span id="ac-count-val" class="text-sm text-gray-300 block text-center mt-1">4</span>
+                        </div>
+                        <div class="w-1/2">
+                            <label for="ac-model-ref" class="block text-sm font-medium text-gray-300">Referensi Karakter (WAJIB UNTUK FACE-LOCK)</label>
+                            <div id="ac-dropzone" class="dropzone ai-card p-3 text-center rounded-xl cursor-pointer text-sm hover:scale-[1.01]" onclick="document.getElementById('ac-file').click()">
+                                <i data-lucide="user-check" class="w-5 h-5 mx-auto text-cyan-400 drop-shadow-lg"></i>
+                                <p class="text-gray-300">Drag/Klik Gambar Karakter</p>
+                                <input type="file" id="ac-file" accept="image/*" class="hidden">
+                            </div>
+                            <div id="ac-preview" class="hidden text-sm text-center text-green-400 mt-1">Referensi Wajah TERKUNCI</div>
+                        </div>
+                    </div>
+
+                    <button onclick="generateAutoContent('ac')" class="ai-button w-full mt-6 px-6 py-3 rounded-xl font-semibold flex items-center justify-center">
+                        <i data-lucide="film" class="w-5 h-5 mr-2"></i> Buat Konten Otomatis
+                    </button>
+                    
+                    <div id="ac-output" class="mt-8 space-y-6">
+                        <!-- Story/Scene output will appear here -->
+                    </div>
+                    <div id="ac-status" class="mt-4 text-center text-cyan-400 font-medium hidden"></div>
+                </section>
+
+                <!-- 7. Afiliasi UGC (FINAL) -->
+                <section id="ugc-affiliate" class="tool-module ai-card content-padding rounded-3xl hidden">
+                    <h3 class="text-2xl font-bold mb-4 flex items-center text-white drop-shadow-md"><i data-lucide="tag" class="w-6 h-6 mr-2 text-red-400"></i> Afiliasi UGC Premium</h3>
+                    <p class="text-gray-400 mb-6">Gunakan gambar produk dan model Anda untuk jaminan konsistensi visual 100% pada output UGC multi-adegan 9:16.</p>
+                    
+                    <!-- Image Uploads -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <!-- Product Image Dropzone -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Gambar Produk (WAJIB untuk KUNCI PRODUK)</label>
+                            <div id="ugc-product-dropzone" class="dropzone ai-card p-4 text-center rounded-xl cursor-pointer hover:scale-[1.01]" onclick="document.getElementById('ugc-product-file').click()">
+                                <i data-lucide="package" class="w-6 h-6 mx-auto text-cyan-400 mb-1 drop-shadow-lg"></i>
+                                <p class="text-gray-300 text-sm">Drag/Klik Gambar Produk Asli</p>
+                                <input type="file" id="ugc-product-file" accept="image/*" class="hidden">
+                            </div>
+                            <div id="ugc-product-preview-container" class="mt-2 text-center hidden">
+                                <img id="ugc-product-preview-img" class="w-24 h-auto inline-block object-contain rounded-xl border border-gray-600/30 drop-shadow-lg" alt="Product Preview">
+                            </div>
+                        </div>
+                        
+                        <!-- Model Reference Dropzone -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-300 mb-2">Ref. Wajah Model (Opsional, Jaminan Face-Lock)</label>
+                            <div id="ugc-model-dropzone" class="dropzone ai-card p-4 text-center rounded-xl cursor-pointer hover:scale-[1.01]" onclick="document.getElementById('ugc-model-file').click()">
+                                <i data-lucide="user-check" class="w-6 h-6 mx-auto text-cyan-400 mb-1 drop-shadow-lg"></i>
+                                <p class="text-gray-300 text-sm">Drag/Klik Wajah Model (Wajib Potret)</p>
+                                <input type="file" id="ugc-model-file" accept="image/*" class="hidden">
+                            </div>
+                            <div id="ugc-model-preview" class="mt-2 text-sm text-center text-green-400 hidden">Ref. Wajah TERKUNCI</div>
+                        </div>
+                    </div>
+
+                    <textarea id="ugc-product-desc" class="ai-input w-full border-none rounded-xl p-3 h-20 text-white placeholder-gray-400" placeholder="Deskripsi Teks Produk Tambahan atau Aksi Model (e.g., model sedang mengaplikasikan serum, produk diletakkan di meja kayu)..."></textarea>
+                    
+                    <div class="flex space-x-4 mt-4">
+                        <div class="w-1/2">
+                            <label for="ugc-category" class="block text-sm font-medium text-gray-300">Kategori Produk</label>
+                            <select id="ugc-category" class="ai-input w-full border-none rounded-xl p-2.5 text-white">
+                                <option>Furnitur / Peralatan Rumah</option>
+                                <option>Fashion / Aksesori</option>
+                                <option>Kecantikan / Skincare</option>
+                                <option>Elektronik / Gadget</option>
+                                <option>Makanan & Minuman</option>
+                            </select>
+                        </div>
+                        <div class-="w-1/2">
+                            <label for="ugc-style" class="block text-sm font-medium text-gray-300">Pilih Gaya Konten</label>
+                            <select id="ugc-style" class="ai-input w-full border-none rounded-xl p-2.5 text-white">
+                                <option>Minimalis & Bersih</option>
+                                <option>Gaya Jalanan (Street Style)</option>
+                                <option>Pencahayaan Lembut (Soft Lighting)</option>
+                                <option>Vibran & Berani (Vibrant & Bold)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- SCENE COUNT INPUT -->
+                    <div class="mt-4">
+                        <label for="ugc-count" class="block text-sm font-medium text-gray-300">Jumlah Adegan (1-5)</label>
+                        <input type="range" id="ugc-count" min="1" max="5" value="3" oninput="document.getElementById('ugc-count-val').innerText=this.value" class="w-full h-2 bg-gray-700/50 rounded-lg appearance-none cursor-pointer range-lg">
+                        <span id="ugc-count-val" class="text-sm text-gray-300 block text-center mt-1">3</span>
+                    </div>
+
+                    <button onclick="generateUGC('ugc')" class="ai-button w-full mt-6 px-6 py-3 rounded-xl font-semibold flex items-center justify-center">
+                        <i data-lucide="shopping-bag" class="w-5 h-5 mr-2"></i> Buat Konten Afiliasi & Narasi
+                    </button>
+
+                    <!-- Narrative Output -->
+                    <div id="ugc-narrative-output" class="mt-6 p-4 ai-card rounded-xl border-l-4 border-yellow-500 hidden">
+                        <h4 class="text-lg font-semibold text-yellow-400 mb-2 drop-shadow-md">Narasi Promosi (Teks Pendek):</h4>
+                        <p id="ugc-narrative-text" class="text-gray-200 italic text-sm"></p>
+                        <button onclick="copyToClipboard(document.getElementById('ugc-narrative-text').innerText)" class="text-xs text-cyan-400 hover:text-cyan-200 mt-2 flex items-center">
+                            <i data-lucide="copy" class="w-4 h-4 mr-1"></i> Salin Narasi
+                        </button>
+                    </div>
+
+                    <div id="ugc-output" class="mt-8 space-y-6">
+                        <!-- UGC output will appear here -->
+                    </div>
+                    <div id="ugc-status" class="mt-4 text-center text-cyan-400 font-medium hidden"></div>
+                </section>
+                
+            </div>
+
+            <!-- Global Message Box -->
+            <div id="message-box" class="fixed bottom-4 right-4 bg-red-600/90 text-white content-padding rounded-xl shadow-2xl hidden z-50 backdrop-blur-sm">
+                <p id="message-text"></p>
+                <button class="ml-4 font-bold" onclick="document.getElementById('message-box').classList.add('hidden')">Tutup</button>
+            </div>
+            
+        </main>
+    </div>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // --- GLOBAL CONFIGURATION AND UTILITIES ---
+        const apiKey = "";
+        const GEMINI_TEXT_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        const GEMINI_TTS_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+        // Use Imagen for Text-to-Image for better 9:16 stability control
+        const IMAGEN_URL = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+        // Use Gemini Flash Image Preview for tasks requiring an input image (Style Change, Auto Content with Ref)
+        const GEMINI_IMAGE_EDIT_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+
+        // Global state for file inputs
+        let i2pBase64Image = null;
+        let scBase64Image = null;
+        let acBase64Image = null;
+        let ugcProductBase64Image = null;	
+        let ugcModelBase64Image = null;	
+        let mpBase64Image = null; // New global variable for Meme Pro image
+
+        /**
+         * Generic Fetch with Exponential Backoff and Error Handling
+         */
+        async function fetchWithExponentialBackoff(url, options, maxRetries = 5) {
+            for (let i = 0; i < maxRetries; i++) {
+                try {
+                    const response = await fetch(url, options);
+                    
+                    // --- REVISED ERROR HANDLING START ---
+                    const text = await response.text();
+                    
+                    if (!response.ok) {
+                        let errorDetails = 'Unknown API error.';
+                        try {
+                            const errorJson = JSON.parse(text);
+                            errorDetails = errorJson.error?.message || text;
+                        } catch {
+                            errorDetails = text.substring(0, 100) || 'No readable error body.';
+                        }
+                        
+                        if (response.status === 429 && i < maxRetries - 1) { // Too Many Requests
+                            const delay = Math.pow(2, i) * 1000 + Math.random() * 1000;
+                            console.warn(`[API] Rate limit hit. Retrying in ${delay / 1000}s...`);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                            continue;
+                        }
+                        
+                        throw new Error(`API Error ${response.status}: ${errorDetails}`);
+                    }
+                    
+                    if (!text) {
+                        throw new Error('API returned an empty response body.');
+                    }
+                    
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error("Failed to parse JSON:", text);
+                        throw new Error(`Invalid JSON response from API. Gagal parsing JSON. Body: ${text.substring(0, 100)}...`);
+                    }
+                    // --- REVISED ERROR HANDLING END ---
+
+                } catch (error) {
+                    console.error(`[API] Fetch attempt ${i + 1} failed:`, error.message);
+                    if (i === maxRetries - 1) {
+                        throw new Error(`Gagal menghubungi API setelah ${maxRetries} percobaan. Cek koneksi atau Kunci API Anda. Detail: ${error.message}`);
+                    }
+                }
+            }
+        }
+
+        /**
+         * File Dropzone/Input Handler
+         */
+        function setupDropzone(fileInputId, dropzoneId, base64Var, previewId, loadCallback = null) {
+            const fileInput = document.getElementById(fileInputId);
+            const dropzone = document.getElementById(dropzoneId);
+            const preview = document.getElementById(previewId);
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, preventDefaults, false);
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => dropzone.classList.add('drag-over'), false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, () => dropzone.classList.remove('drag-over'), false);
+            });
+
+            dropzone.addEventListener('drop', handleDrop, false);
+            fileInput.addEventListener('change', handleFileSelect, false);
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            function handleDrop(e) {
+                let dt = e.dataTransfer;
+                let files = dt.files;
+                handleFiles(files);
+            }
+
+            function handleFileSelect(e) {
+                handleFiles(e.target.files);
+            }
+
+            function handleFiles(files) {
+                if (files.length === 0) return;
+                const file = files[0];
+                
+                // Read file as Data URL for preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const base64 = e.target.result.split(',')[1];
+                    
+                    // Update global base64 variable
+                    if (base64Var === 'i2pBase64Image') i2pBase64Image = base64;
+                    if (base64Var === 'scBase64Image') scBase64Image = base64;
+                    if (base64Var === 'acBase64Image') acBase64Image = base64;
+                    if (base64Var === 'ugcProductBase64Image') ugcProductBase64Image = base64;
+                    if (base64Var === 'ugcModelBase64Image') ugcModelBase64Image = base64;
+                    if (base64Var === 'mpBase64Image') mpBase64Image = base64;
+
+
+                    // Update preview
+                    if (preview.tagName === 'IMG') {
+                        preview.src = e.target.result;
+                        preview.closest('div').classList.remove('hidden');
+                    } else if (preview.tagName === 'DIV' && preview.id === 'ac-preview') {
+                        preview.classList.remove('hidden');
+                    } else if (preview.tagName === 'DIV' && (preview.id === 'ugc-model-preview' || preview.id === 'ugc-product-preview-container')) { // Handle UGC Model/Product Preview DIV
+                        if(preview.id === 'ugc-product-preview-container') {
+                            document.getElementById('ugc-product-preview-img').src = e.target.result;
+                            document.getElementById('ugc-product-preview-container').classList.remove('hidden');
+                        } else if (preview.id === 'ugc-model-preview') {
+                            document.getElementById('ugc-model-preview').classList.remove('hidden');
+                        }
+                    } else if (preview.tagName === 'DIV' && preview.id === 'mp-image-wrapper') {
+                        // For meme pro, we don't show the preview here, the innerHTML update will happen in the main logic.
+                    }
+
+                    
+                    if (loadCallback) loadCallback();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // --- TTS AUDIO UTILITIES ---
+        function base64ToArrayBuffer(base64) {
+            const binaryString = window.atob(base64);
+            const len = binaryString.length;
+            const bytes = new Uint8Array(len);
+            for (let i = 0; i < len; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        function pcmToWav(pcmData, sampleRate) {
+            const numChannels = 1;
+            const bytesPerSample = 2; // Int16
+            const blockAlign = numChannels * bytesPerSample;
+            const byteRate = sampleRate * blockAlign;
+            const dataSize = pcmData.length * bytesPerSample;
+            const buffer = new ArrayBuffer(44 + dataSize);
+            const view = new DataView(buffer);
+
+            let offset = 0;
+            const writeString = (str) => {
+                for (let i = 0; i < str.length; i++) {
+                    view.setUint8(offset + i, str.charCodeAt(i));
+                }
+                offset += str.length;
+            };
+
+            // RIFF chunk
+            writeString('RIFF');
+            view.setUint32(offset, 36 + dataSize, true); offset += 4;
+            writeString('WAVE');
+
+            // fmt chunk
+            writeString('fmt ');
+            view.setUint32(offset, 16, true); offset += 4; // Sub-chunk size
+            view.setUint16(offset, 1, true); offset += 2;	// Audio format (1 = PCM)
+            view.setUint16(offset, numChannels, true); offset += 2;
+            view.setUint32(offset, sampleRate, true); offset += 4;
+            view.setUint32(offset, byteRate, true); offset += 4;
+            view.setUint16(offset, blockAlign, true); offset += 2;
+            view.setUint16(offset, bytesPerSample * 8, true); offset += 2; // Bits per sample
+
+            // data chunk
+            writeString('data');
+            view.setUint32(offset, dataSize, true); offset += 4;
+
+            // Write PCM data
+            const pcm16 = new Int16Array(buffer, offset);
+            for (let i = 0; i < pcmData.length; i++) {
+                pcm16[i] = pcmData[i];
+            }
+
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        /**
+         * Global UI Handlers
+         */
+        function showMessage(text, isError = true) {
+            const box = document.getElementById('message-box');
+            const textEl = document.getElementById('message-text');
+            box.classList.remove('hidden', 'bg-red-600/90', 'bg-green-600/90');
+            box.classList.add(isError ? 'bg-red-600/90' : 'bg-green-600/90');
+            textEl.innerText = text;
+            setTimeout(() => { box.classList.add('hidden'); }, 5000); // Auto hide after 5 seconds
+        }
+
+        function toggleLoading(toolPrefix, show) {
+            const statusEl = document.getElementById(`${toolPrefix}-status`);
+            statusEl.innerHTML = show ? '<div class="loading-ring mx-auto"></div> Memproses, mohon tunggu...' : '';
+            statusEl.classList.toggle('hidden', !show);
+            document.querySelectorAll(`#${toolPrefix} button`).forEach(btn => btn.disabled = show);
+        }
+        
+        function showTool(toolName) {
+            // Hide all modules
+            document.querySelectorAll('.tool-module').forEach(el => el.classList.add('hidden'));
+            // Remove active state from all buttons
+            document.querySelectorAll('#nav-menu button').forEach(el => el.classList.remove('ai-active-tab'));
+            document.querySelectorAll('#nav-menu button').forEach(el => el.classList.add('ai-sidebar-item'));
+
+            // Show the selected module
+            const moduleEl = document.getElementById(toolName);
+            moduleEl.classList.remove('hidden');
+
+            // Set the title
+            const buttonEl = document.querySelector(`[data-tool="${toolName}"]`);
+            document.getElementById('tool-title').innerText = buttonEl.textContent.trim();
+
+            // Set active button style
+            buttonEl.classList.add('ai-active-tab');
+            buttonEl.classList.remove('ai-sidebar-item');
+        }
+
+        function getAspectRatio(templateValue) {
+            if (templateValue === '1:1') {
+                return { ratio: '1:1', css: 'aspect-square' };
+            }
+            // Default or specialized templates use 9:16, but Imagen needs the specific ratio.
+            return { ratio: '9:16', css: 'aspect-9-16' };
+        }
+
+        // Set default tool on load
+        window.onload = () => {
+            showTool('meme-pro'); // Default to the new feature
+            // Setup Dropzones
+            setupDropzone('i2p-file', 'i2p-dropzone', 'i2pBase64Image', 'i2p-preview-img');
+            setupDropzone('sc-file', 'sc-dropzone', 'scBase64Image', 'sc-preview-img');
+            setupDropzone('ac-file', 'ac-dropzone', 'acBase64Image', 'ac-preview');
+            setupDropzone('ugc-product-file', 'ugc-product-dropzone', 'ugcProductBase64Image', 'ugc-product-preview-container');	
+            setupDropzone('ugc-model-file', 'ugc-model-dropzone', 'ugcModelBase64Image', 'ugc-model-preview');
+            setupDropzone('mp-file', 'mp-dropzone', 'mpBase64Image', 'mp-image-wrapper', () => {
+                // Clear image wrapper content when a new file is dropped/selected
+                document.getElementById('mp-image-wrapper').innerHTML = '';
+            }); // New Dropzone setup
+        };
+
+        // --- 8. ASISTEN VOICE OVER (VOA) ---
+        async function generateVoiceOver(toolPrefix) {
+            const prompt = document.getElementById(`${toolPrefix}-prompt`).value.trim();
+            const outputEl = document.getElementById(`${toolPrefix}-script-output`);
+            outputEl.value = '';
+
+            if (!prompt) {
+                showMessage("Permintaan naskah voice over wajib diisi.");
+                return;
+            }
+
+            toggleLoading(toolPrefix, true);
+
+            try {
+                // New System Prompt incorporating the user's request for persona and style.
+                const systemPrompt = "Act as a professional female voice-over artist and content narrator (TikTok/YouTube style). Your response MUST be a complete, cohesive, ready-to-read script in Indonesian. Use a warm, natural, clear, and professional tone. Structure the response with smooth rhythm and natural pauses, as if being read aloud. If the prompt is brief, generate a concise script. If the prompt requires detail, generate a long script. DO NOT include any conversational introduction, conclusion, numbering, or external formatting (like markdown quotes or code blocks), only the pure narration script text.";
+                const userQuery = `Buatkan naskah voice over berdasarkan permintaan ini: ${prompt}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                };
+
+                const result = await fetchWithExponentialBackoff(GEMINI_TEXT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                toggleLoading(toolPrefix, false);
+
+                const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (generatedText) {
+                    outputEl.value = generatedText.trim();
+                    showMessage("Naskah Voice Over berhasil dibuat!", false);
+                    lucide.createIcons();
+                } else {
+                    throw new Error("Gagal mendapatkan naskah dari AI. Respon kosong.");
+                }
+
+            } catch (error) {
+                toggleLoading(toolPrefix, false);
+                showMessage(error.message);
+            }
+        }
+
+
+        // --- 1. TEXT KE GAMBAR (T2I) ---
+        async function generateImage(toolPrefix) {
+            const prompt = document.getElementById(`${toolPrefix}-prompt`).value.trim();
+            const count = parseInt(document.getElementById(`${toolPrefix}-count`).value);
+            const outputEl = document.getElementById(`${toolPrefix}-output`);
+            outputEl.innerHTML = '';
+            
+            if (!prompt) {
+                showMessage("Deskripsi gambar wajib diisi.");
+                return;
+            }
+
+            // Injecting quality and 9:16 stability constraints into the prompt
+            const fullPrompt = `Kualitas tertinggi, komposisi vertikal sinematik, anatomi manusia sempurna, pencahayaan profesional, tekstur halus, warna harmonis. ${prompt}. Rasio 9:16, Ultra Realistis, siap pakai konten komersial.`;
+
+            toggleLoading(toolPrefix, true);
+
+            try {
+                const payload = {
+                    instances: [{ prompt: fullPrompt }],
+                    parameters: {
+                        sampleCount: count,
+                        aspectRatio: '9:16' // Crucial for vertical format
+                    }
+                };
+                
+                const result = await fetchWithExponentialBackoff(IMAGEN_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                toggleLoading(toolPrefix, false);
+
+                if (result.predictions && result.predictions.length > 0) {
+                    result.predictions.forEach((prediction) => {
+                        const base64Data = prediction.bytesBase64Encoded;
+                        const imageUrl = `data:image/png;base64,${base64Data}`;
+                        outputEl.innerHTML += `
+                            <div class="aspect-9-16 group relative">
+                                <img src="${imageUrl}" alt="AI Generated Image" class="object-cover transition duration-300 group-hover:opacity-80"/>
+                                <div class="content-placeholder absolute inset-0 flex items-end justify-center opacity-0 group-hover:opacity-100 transition duration-300 bg-black bg-opacity-30">
+                                    <button onclick="downloadImage('${imageUrl}', 'T2I_9x16_premium.png')" class="ai-button mb-4 px-4 py-2 text-sm rounded-full">
+                                        Download
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    showMessage(`Berhasil membuat ${count} gambar premium 9:16!`, false);
+                } else {
+                    throw new Error("API tidak menghasilkan gambar. Coba deskripsi yang berbeda.");
+                }
+
+            } catch (error) {
+                toggleLoading(toolPrefix, false);
+                showMessage(error.message);
+            }
+        }
+
+        // --- 2. GAMBAR KE PROMPT (I2P) ---
+        async function generatePrompt(toolPrefix) {
+            const outputEl = document.getElementById('i2p-prompt-output');
+            outputEl.value = '';
+
+            if (!i2pBase64Image) {
+                showMessage("Mohon unggah gambar terlebih dahulu.");
+                return;
+            }
+
+            toggleLoading(toolPrefix, true);
+
+            try {
+                const systemPrompt = "Act as an ultra-detailed visual analysis AI. Generate a factual, complete, and precise prompt description in **Indonesian** of the uploaded image. Include specific details on lighting, camera style, color palette, texture, pose, mood, and background elements, suitable for a stable 9:16 image re-generation. DO NOT give any conversational response, only the prompt text.";
+                const userQuery = "Analisis gambar ini dan buat prompt yang sangat detail.";
+
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [
+                            { text: userQuery },
+                            {
+                                inlineData: {
+                                    mimeType: "image/png",
+                                    data: i2pBase64Image
+                                }
+                            }
+                        ]
+                    }],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    },
+                };
+
+                const result = await fetchWithExponentialBackoff(GEMINI_TEXT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                toggleLoading(toolPrefix, false);
+
+                const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (generatedText) {
+                    outputEl.value = generatedText;
+                    showMessage("Prompt detail berhasil dibuat!", false);
+                } else {
+                    throw new Error("Gagal mendapatkan prompt dari AI. Respon kosong.");
+                }
+
+            } catch (error) {
+                toggleLoading(toolPrefix, false);
+                showMessage(error.message);
+            }
+        }
+
+        // --- 3. TEXT KE SUARA (T2A) ---
+        async function generateAudio(toolPrefix) {
+            const text = document.getElementById(`${toolPrefix}-text`).value.trim();
+            const style = document.getElementById(`${toolPrefix}-style`).value;
+            const voice = document.getElementById(`${toolPrefix}-voice`).value;
+            const audioPlayer = document.getElementById(`${toolPrefix}-audio-player`);
+
+            if (!text) {
+                showMessage("Teks untuk diubah menjadi suara wajib diisi.");
+                return;
+            }
+
+            // Injecting professional audio quality constraints
+            const fullPrompt = `Say in ${style} style, naturally and clearly, with full noise reduction, automatic volume normalization, and human-like expression: "${text}"`;
+
+            toggleLoading(toolPrefix, true);
+            audioPlayer.classList.add('hidden');
+
+            try {
+                const payload = {
+                    contents: [{
+                        parts: [{ text: fullPrompt }]
+                    }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: {
+                            voiceConfig: {
+                                prebuiltVoiceConfig: { voiceName: voice }
+                            }
+                        }
+                    },
+                    model: "gemini-2.5-flash-preview-tts"
+                };
+
+                const result = await fetchWithExponentialBackoff(GEMINI_TTS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                toggleLoading(toolPrefix, false);
+
+                const part = result?.candidates?.[0]?.content?.parts?.[0];
+                const audioData = part?.inlineData?.data;
+                const mimeType = part?.inlineData?.mimeType;
+
+                if (audioData && mimeType && mimeType.startsWith("audio/L16")) {
+                    const sampleRateMatch = mimeType.match(/rate=(\d+)/);
+                    if (!sampleRateMatch) throw new Error("Gagal menentukan sample rate audio.");
+                    const sampleRate = parseInt(sampleRateMatch[1], 10);
+                    
+                    const pcmData = base64ToArrayBuffer(audioData);
+                    const pcm16 = new Int16Array(pcmData);
+                    const wavBlob = pcmToWav(pcm16, sampleRate);
+                    
+                    audioPlayer.src = URL.createObjectURL(wavBlob);
+                    audioPlayer.classList.remove('hidden');
+                    showMessage("Audio profesional berhasil dibuat!", false);
+                } else {
+                    throw new Error("Gagal menghasilkan audio. Format tidak didukung atau respon kosong.");
+                }
+
+            } catch (error) {
+                toggleLoading(toolPrefix, false);
+                showMessage(error.message);
+            }
+        }
+
+        // --- 4. GENERATOR HASHTAG (HGEN) ---
+        async function generateHashtags(toolPrefix) {
+            const topic = document.getElementById(`${toolPrefix}-topic`).value.trim();
+            const outputEl = document.getElementById(`${toolPrefix}-output`);
+            outputEl.innerHTML = '';
+
+            if (!topic) {
+                showMessage("Topik konten wajib diisi.");
+                return;
+            }
+
+            toggleLoading(toolPrefix, true);
+
+            try {
+                const systemPrompt = "Act as a smart trend analysis AI. Generate a list of highly relevant, non-duplicate hashtags in Indonesian, grouped into three categories based on competition level (Tinggi, Sedang, Rendah) for maximum organic reach and visibility. Output MUST be in JSON format only, following the provided schema.";
+                const userQuery = `Buatkan strategi hashtag untuk topik: ${topic}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "hashtags": {
+                                    type: "OBJECT",
+                                    properties: {
+                                        "Tinggi": { "type": "ARRAY", "items": { "type": "STRING" } },
+                                        "Sedang": { "type": "ARRAY", "items": { "type": "STRING" } },
+                                        "Rendah": { "type": "ARRAY", "items": { "type": "STRING" } }
+                                    },
+                                    "propertyOrdering": ["Tinggi", "Sedang", "Rendah"]
+                                }
+                            }
+                        }
+                    }
+                };
+
+                const result = await fetchWithExponentialBackoff(GEMINI_TEXT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                toggleLoading(toolPrefix, false);
+
+                let jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!jsonText) throw new Error("Gagal mendapatkan respon JSON dari AI.");
+                
+                // Sanitization check for consistency
+                jsonText = jsonText.trim();
+                if (jsonText.startsWith('```')) {
+                    const start = jsonText.indexOf('{');
+                    const end = jsonText.lastIndexOf('}');
+                    if (start !== -1 && end !== -1 && end > start) {
+                        jsonText = jsonText.substring(start, end + 1);
+                    } else {
+                        const lines = jsonText.split('\n');
+                        if (lines.length > 2) {
+                            jsonText = lines.slice(1, -1).join('\n');
+                        }
+                    }
+                }
+                
+                const data = JSON.parse(jsonText);
+                const categories = data.hashtags;
+
+                let html = '';
+                for (const level in categories) {
+                    if (categories[level].length > 0) {
+                        const hashtags = categories[level].join(' ');
+                        html += `
+                            <div class="ai-card content-padding rounded-xl border-l-4 border-cyan-500">
+                                <h4 class="text-xl font-semibold mb-2">${level} (${categories[level].length} Hashtag)</h4>
+                                <p class="text-gray-300 text-sm">${hashtags}</p>
+                                <button onclick="copyToClipboard('${hashtags.replace(/#/g, '')}')" class="text-xs text-cyan-400 hover:text-cyan-200 mt-2 flex items-center">
+                                    <i data-lucide="copy" class="w-4 h-4 mr-1"></i> Salin Semua
+                                </button>
+                            </div>
+                        `;
+                    }
+                }
+
+                outputEl.innerHTML = html;
+                lucide.createIcons(); // Re-render icons
+                showMessage("Strategi hashtag berhasil dibuat!", false);
+
+            } catch (error) {
+                toggleLoading(toolPrefix, false);
+                showMessage(error.message);
+            }
+        }
+
+        // --- 5. UBAH GAYA MODEL (SC) ---
+        async function changeStyle(toolPrefix) {
+            const stylePrompt = document.getElementById(`${toolPrefix}-style-prompt`).value.trim();
+            const count = parseInt(document.getElementById(`${toolPrefix}-count`).value);
+            const outputEl = document.getElementById(`${toolPrefix}-output`);
+            outputEl.innerHTML = '';
+            
+            if (!scBase64Image) {
+                showMessage("Mohon unggah gambar model terlebih dahulu.");
+                return;
+            }
+            if (!stylePrompt) {
+                showMessage("Deskripsi gaya baru wajib diisi.");
+                return;
+            }
+
+            // High-level instruction for face preservation, quality, and 9:16
+            const systemPrompt = `You are a style transfer expert. Preserve the facial identity (structure, skin texture, tone) of the person in the input image 100% while accurately applying the requested style and background. The final output MUST be a premium, high-quality, ultra-stable 9:16 vertical image. DO NOT change the person's ethnicity, age, or core characteristics.`;
+
+            toggleLoading(toolPrefix, true);
+
+            try {
+                const userQuery = `Ubah gaya model ini menjadi: ${stylePrompt}. Wajah harus 100% konsisten. Hasilkan ${count} variasi.`;
+                
+                const payload = {
+                    contents: [{
+                        role: "user",
+                        parts: [
+                            { text: userQuery },
+                            {
+                                inlineData: {
+                                    mimeType: "image/png",
+                                    data: scBase64Image
+                                }
+                            }
+                        ]
+                    }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: {
+                        responseModalities: ['IMAGE'],
+                        sampleCount: count,
+                        aspectRatio: '9:16', // Enforce 9:16
+                    }
+                };
+
+                const result = await fetchWithExponentialBackoff(GEMINI_IMAGE_EDIT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                toggleLoading(toolPrefix, false);
+
+                const imageParts = result?.candidates?.[0]?.content?.parts?.filter(p => p.inlineData);
+
+                if (imageParts && imageParts.length > 0) {
+                    imageParts.forEach((part) => {
+                        const base64Data = part.inlineData.data;
+                        const imageUrl = `data:image/png;base64,${base64Data}`;
+                        outputEl.innerHTML += `
+                            <div class="aspect-9-16 group relative">
+                                <img src="${imageUrl}" alt="Style Changed Model" class="object-cover transition duration-300 group-hover:opacity-80"/>
+                                <div class="content-placeholder absolute inset-0 flex items-end justify-center opacity-0 group-hover:opacity-100 transition duration-300 bg-black bg-opacity-30">
+                                    <button onclick="downloadImage('${imageUrl}', 'SC_9x16_consistent.png')" class="ai-button mb-4 px-4 py-2 text-sm rounded-full">
+                                        Download
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    showMessage(`Berhasil membuat ${imageParts.length} variasi gaya model 9:16 dengan wajah stabil!`, false);
+                } else {
+                    throw new Error("Gagal menghasilkan gambar variasi gaya. Respon kosong.");
+                }
+
+            } catch (error) {
+                toggleLoading(toolPrefix, false);
+                showMessage(error.message);
+            }
+        }
+        
+        // --- 6. MEME PRO (MP) ---
+        async function generateMeme(toolPrefix) {
+            const prompt = document.getElementById(`${toolPrefix}-prompt`).value.trim();
+            const template = document.getElementById(`${toolPrefix}-template`).value;
+            const imageBase64 = mpBase64Image;
+            const outputContainerEl = document.getElementById(`${toolPrefix}-output-container`);
+            const captionTextEl = document.getElementById(`${toolPrefix}-caption-text`);
+            const imageWrapperEl = document.getElementById(`${toolPrefix}-image-wrapper`);
+            const { ratio, css } = getAspectRatio(template);
+            
+            outputContainerEl.classList.add('hidden');
+            captionTextEl.innerText = '';
+            imageWrapperEl.innerHTML = '';
+
+            if (!prompt && !imageBase64) {
+                showMessage("Anda harus menyediakan ide meme (prompt) atau mengunggah gambar.");
+                return;
+            }
+
+            toggleLoading(toolPrefix, true);
+
+            try {
+                let finalCaption = '';
+                let imageToGeneratePrompt = '';
+                let finalImageUrl = '';
+                
+                const langConstraint = "Output caption MUST be in Indonesian. Humor MUST be light, safe, and relatable to modern internet culture (TikTok/IG style).";
+
+                if (imageBase64) {
+                    // MODE 1: Image-to-Meme (Analyze and Caption)
+                    // Note: In this mode, we show the input image back as the visual result.
+                    const analysisSystemPrompt = `You are a viral meme caption generator. Analyze the uploaded image and the user's context (${prompt || 'no extra context'}) to create a single, hilarious, safe, and culturally relevant Indonesian meme caption. DO NOT include any text inside the image. Only provide the Indonesian caption text. ${langConstraint}`;
+                    
+                    const payload = {
+                        contents: [{
+                            role: "user",
+                            parts: [
+                                { text: `Buatkan caption meme yang lucu untuk gambar ini. Konteks tambahan: ${prompt}` },
+                                { inlineData: { mimeType: "image/png", data: imageBase64 } }
+                            ]
+                        }],
+                        systemInstruction: { parts: [{ text: analysisSystemPrompt }] },
+                    };
+
+                    const result = await fetchWithExponentialBackoff(GEMINI_TEXT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    finalCaption = result.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "Gagal menghasilkan caption lucu.";
+                    
+                    // For Image-to-Meme, the output image is just the processed input image for consistent display
+                    finalImageUrl = `data:image/png;base64,${imageBase64}`;
+                    
+                } else {
+                    // MODE 2: Text-to-Meme (Generate Image Template + Caption)
+                    
+                    // Step 2a: Generate Caption and Visual Prompt (JSON Output)
+                    const stylePrompt = template === '9:16' ? 'a viral TikTok POV setup, focus on one character' : 
+                                        template === '1:1' ? 'an observational side-by-side or comparison image' : 
+                                        `a clear, recognizable meme based on the "${template}" style, minimalist and modern for easy captioning.`;
+
+                    const generationSystemPrompt = `You are a viral meme engine. Based on the user prompt: '${prompt}', generate two things in JSON format only: 1. A short, funny, Indonesian 'caption'. 2. A detailed English 'visual_prompt' suitable for a high-quality image generator, describing a clear, recognizable visual to match the style: ${stylePrompt}. Ensure the humor is light and the visuals are clean. Output MUST be JSON only.`;
+
+                    const jsonPayload = {
+                        contents: [{ parts: [{ text: `Buatkan meme tentang ide ini: ${prompt}` }] }],
+                        systemInstruction: { parts: [{ text: generationSystemPrompt }] },
+                        generationConfig: {
+                            responseMimeType: "application/json",
+                            responseSchema: {
+                                type: "OBJECT",
+                                properties: {
+                                    "caption": { "type": "STRING", "description": "The final meme caption in Indonesian." },
+                                    "visual_prompt": { "type": "STRING", "description": "The detailed English prompt for image generation." }
+                                },
+                                "propertyOrdering": ["caption", "visual_prompt"]
+                            }
+                        }
+                    };
+                    
+                    const jsonResult = await fetchWithExponentialBackoff(GEMINI_TEXT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(jsonPayload)
+                    });
+
+                    let jsonText = jsonResult.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if (!jsonText) throw new Error("Gagal membuat konsep meme (JSON).");
+
+                    // Sanitize JSON Text
+                    jsonText = jsonText.trim().replace(/^```json\s*|```\s*$/g, '').trim();
+                    const data = JSON.parse(jsonText);
+                    
+                    finalCaption = data.caption || "Gagal mendapatkan caption.";
+                    imageToGeneratePrompt = data.visual_prompt || `A clean, professional-quality, photographic image in the style of ${template}.`;
+
+                    // Step 2b: Generate Image using the Visual Prompt
+                    const imagePayload = {
+                        instances: [{ prompt: imageToGeneratePrompt + `. High quality, photographic, clean background. No text or graphic overlays.` }],
+                        parameters: {
+                            sampleCount: 1,
+                            aspectRatio: ratio // '9:16' or '1:1'
+                        }
+                    };
+
+                    const imageResult = await fetchWithExponentialBackoff(IMAGEN_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(imagePayload)
+                    });
+
+                    const base64Data = imageResult.predictions?.[0]?.bytesBase64Encoded;
+
+                    if (base64Data) {
+                        finalImageUrl = `data:image/png;base64,${base64Data}`;
+                    } else {
+                        throw new Error("Gagal menghasilkan gambar meme.");
+                    }
+                }
+
+                // Final UI Update
+                captionTextEl.innerText = finalCaption;
+                outputContainerEl.classList.remove('hidden');
+
+                // Render the image wrapper dynamically based on aspect ratio
+                imageWrapperEl.innerHTML = `
+                    <div class="${css} w-full group relative">
+                        <img src="${finalImageUrl}" alt="AI Generated Meme Visual" class="object-cover transition duration-300 group-hover:opacity-80"/>
+                        <div class="content-placeholder absolute inset-0 flex items-end justify-center opacity-0 group-hover:opacity-100 transition duration-300 bg-black bg-opacity-30">
+                            <button onclick="downloadImage('${finalImageUrl}', 'MemePro_${ratio.replace(':', 'x')}.png')" class="ai-button mb-4 px-4 py-2 text-sm rounded-full">
+                                Download Visual
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                showMessage("Meme berhasil dibuat! Siap viral!", false);
+                lucide.createIcons();
+
+            } catch (error) {
+                toggleLoading(toolPrefix, false);
+                showMessage(error.message);
+            }
+        }
+
+        // --- 6. KONTEN OTOMATIS (AC) - REVISED FOR FACE LOCK ---
+        async function generateAutoContent(toolPrefix) {
+            const title = document.getElementById(`${toolPrefix}-title`).value.trim();
+            const count = parseInt(document.getElementById(`${toolPrefix}-count`).value);
+            const outputEl = document.getElementById(`${toolPrefix}-output`);
+            outputEl.innerHTML = '';
+
+            if (!title) {
+                showMessage("Judul konten wajib diisi.");
+                return;
+            }
+
+            if (!acBase64Image) {
+                showMessage("Mohon unggah Gambar Referensi Karakter terlebih dahulu untuk mengaktifkan Face-Lock.");
+                return;
+            }
+
+            toggleLoading(toolPrefix, true);
+
+            try {
+                // Step 1: Generate Story Outline (JSON)
+                const storySystemPrompt = `You are a cinematic vertical content storyboard AI. Generate a logical story outline for a short video based on the user's title. The outline MUST have ${count} scenes. For each scene, provide a 'caption' (Indonesian) and a 'visual_prompt' (English). The visual prompt MUST ensure the main character's facial features (jawline, eyes, nose, lips), skin color, height, and body proportions are **IDENTICAL** to the reference image provided later. The prompt should explicitly state 'Face-Locked Identity 100% Match' and 'Character is the single focus'. The variation should only be in pose, subtle camera angle, or scene environment, but the main character must be perfectly consistent. Output MUST be JSON only.`;
+                const storyUserQuery = `Buatkan alur cerita untuk konten berjudul: ${title}`;
+
+                const storyPayload = {
+                    contents: [{ parts: [{ text: storyUserQuery }] }],
+                    systemInstruction: { parts: [{ text: storySystemPrompt }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    "scene": { "type": "INTEGER" },
+                                    "caption": { "type": "STRING" },
+                                    "visual_prompt": { "type": "STRING" }
+                                }
+                            }
+                        }
+                    }
+                };
+
+                const storyResult = await fetchWithExponentialBackoff(GEMINI_TEXT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(storyPayload)
+                });
+
+                let storyJsonText = storyResult.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!storyJsonText) throw new Error("Gagal membuat alur cerita otomatis.");
+                
+                // Sanitization check
+                storyJsonText = storyJsonText.trim();
+                if (storyJsonText.startsWith('```')) {
+                    const start = storyJsonText.indexOf('[');
+                    const end = storyJsonText.lastIndexOf(']');
+                    if (start !== -1 && end !== -1 && end > start) {
+                        storyJsonText = storyJsonText.substring(start, end + 1);
+                    }
+                }
+                
+                const story = JSON.parse(storyJsonText);
+
+                // Step 2: Generate Image for Each Scene with Face-Lock (Image-to-Image)
+                let fullHtml = '';
+                
+                // Use a single, strict system prompt for all image generations
+                const imageSystemPrompt = "Face-Lock Active: Preserve the facial identity, skin color, and physical proportions of the input reference image 100% in the final output. Ignore any style conflict. The output MUST be a premium, high-quality, ultra-stable 9:16 vertical image. Do NOT alter the face.";
+
+                for (let i = 0; i < story.length; i++) {
+                    const scene = story[i];
+                    
+                    const charRefPart = [{ inlineData: { mimeType: "image/png", data: acBase64Image } }];
+
+                    const imageGenPayload = {
+                             contents: [{
+                                 role: "user",
+                                 parts: [
+                                     { text: `Apply this scene: ${scene.visual_prompt}. Use the provided reference image for the main character's identity (face, body, skin color) exactly. Generate only one image.` },
+                                     ...charRefPart
+                                 ]
+                             }],
+                             systemInstruction: { parts: [{ text: imageSystemPrompt }] },
+                             generationConfig: {
+                                 responseModalities: ['IMAGE'],
+                                 sampleCount: 1,
+                                 aspectRatio: '9:16'
+                             }
+                         };
+
+                    // Update UI to show current scene being processed
+                    outputEl.innerHTML = `
+                        <div class="text-xl font-bold text-cyan-400">Scene ${scene.scene}: ${scene.caption}</div>
+                        <div class="text-gray-400 text-sm italic mb-4">Prompt: ${scene.visual_prompt}</div>
+                        <div id="ac-scene-output-${i}" class="aspect-9-16 w-1/2 mx-auto mb-6 flex items-center justify-center">
+                            <div class="loading-ring"></div>
+                        </div>
+                    ` + fullHtml; // Prepend latest scene processing status
+
+                    const imageResult = await fetchWithExponentialBackoff(GEMINI_IMAGE_EDIT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(imageGenPayload)
+                    });
+
+                    const base64Data = imageResult?.candidates?.[0]?.content?.parts?.[0]?.image?.data || imageResult?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+
+                    if (base64Data) {
+                        const imageUrl = `data:image/png;base64,${base64Data}`;
+                        fullHtml = `
+                            <div class="space-y-2 mb-6 border-b border-gray-700/50 pb-4">
+                                <div class="text-xl font-bold text-cyan-400">Adegan ${scene.scene} Selesai</div>
+                                <div class="text-gray-400 text-sm italic mb-2 hidden">Konsep: ${scene.visual_prompt}</div>	
+                                <div class="output-container">
+                                    <div class="aspect-9-16 w-full group relative">
+                                        <img src="${imageUrl}" alt="Scene ${scene.scene}" class="object-cover"/>
+                                        <div class="content-placeholder absolute inset-0 flex items-end justify-center opacity-0 group-hover:opacity-100 transition duration-300 bg-black bg-opacity-30">
+                                            <button onclick="downloadImage('${imageUrl}', 'AC_Scene${scene.scene}_FaceLocked.png')" class="ai-button mb-4 px-4 py-2 text-sm rounded-full">
+                                                Download
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ` + fullHtml; // Prepend the successfully generated scene
+                        outputEl.innerHTML = fullHtml; // Update output area with all completed scenes
+                    } else {
+                        throw new Error(`Gagal membuat gambar untuk Scene ${scene.scene}. Respon kosong.`);
+                    }
+                }
+
+                toggleLoading(toolPrefix, false);
+                showMessage(`Berhasil membuat konten otomatis ${story.length} adegan dengan konsistensi wajah TERKUNCI!`, false);
+
+            } catch (error) {
+                toggleLoading(toolPrefix, false);
+                outputEl.innerHTML = ''; // Clear partial output on error
+                showMessage(error.message);
+            }
+        }
+
+
+        // --- 7. AFILIASI UGC (UGC) - FINAL VERSION ---
+        async function generateUGC(toolPrefix) {
+            const desc = document.getElementById(`${toolPrefix}-product-desc`).value.trim();
+            const category = document.getElementById(`${toolPrefix}-category`).value;
+            const style = document.getElementById(`${toolPrefix}-style`).value;
+            const sceneCount = parseInt(document.getElementById(`${toolPrefix}-count`).value);
+            
+            const productBase64 = ugcProductBase64Image;
+            const modelBase64 = ugcModelBase64Image;
+
+            const outputEl = document.getElementById(`${toolPrefix}-output`);
+            const narrativeContainerEl = document.getElementById(`${toolPrefix}-narrative-output`);
+            const narrativeTextEl = document.getElementById(`${toolPrefix}-narrative-text`);
+            
+            outputEl.innerHTML = '';
+            narrativeContainerEl.classList.add('hidden');
+            narrativeTextEl.innerText = '';
+            
+            if (!productBase64) { // REQUIRES product image for 100% consistency lock
+                showMessage("Anda WAJIB mengunggah Gambar Produk untuk mengaktifkan Kunci Produk 100%.");
+                return;
+            }
+            if (!desc) {
+                showMessage("Deskripsi produk tambahan atau aksi model wajib diisi.");
+                return;
+            }
+
+
+            toggleLoading(toolPrefix, true);
+
+            try {
+                let sceneContexts = [];
+                
+                // Step 1: Generate Contexts/Visual Prompts (Text API)
+                const contextSystemPrompt = `Act as a cinematic UGC context generator. Create ${sceneCount} distinct and natural visual scenes in **English** where the product is seen in different, aesthetic, UGC-style settings relevant to the category: ${category} and style: ${style}. The scenes should incorporate the requested action: ${desc}. Each scene MUST be a short, powerful visual prompt suitable for a 9:16 image generation API, strictly enforcing: 'Clean visuals, NO text, NO watermarks, NO overlays. Focus on product use/display in a natural context.' Output MUST be a JSON array with one field per object: 'visual_prompt'.`;
+                const contextUserQuery = `Buatkan ${sceneCount} skenario visual berbeda untuk produk.`;
+
+                const contextPayload = {
+                    contents: [{ parts: [{ text: contextUserQuery }] }],
+                    systemInstruction: { parts: [{ text: contextSystemPrompt }] },
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "ARRAY",
+                            items: {
+                                type: "OBJECT",
+                                properties: {
+                                    "visual_prompt": { "type": "STRING", "description": "Visual scene description in English." },
+                                }
+                            }
+                        }
+                    }
+                };
+                
+                const contextResult = await fetchWithExponentialBackoff(GEMINI_TEXT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(contextPayload)
+                });
+
+                let contextJsonText = contextResult.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!contextJsonText) throw new Error("Gagal membuat skenario adegan otomatis.");
+                
+                // Sanitize JSON text
+                let cleanedJsonText = contextJsonText.trim();
+                if (cleanedJsonText.startsWith('```')) {
+                    const start = cleanedJsonText.indexOf('[');
+                    const end = cleanedJsonText.lastIndexOf(']');
+                    if (start !== -1 && end !== -1 && end > start) {
+                        cleanedJsonText = cleanedJsonText.substring(start, end + 1);
+                    } else {
+                        const lines = cleanedJsonText.split('\n');
+                        if (lines.length > 2) {
+                            cleanedJsonText = lines.slice(1, -1).join('\n');
+                        }
+                    }
+                }
+                
+                sceneContexts = JSON.parse(cleanedJsonText);
+                
+                // Step 2: Iterative Image Generation
+                let fullHtml = '';
+                
+                // Strict System Prompt for Image API
+                let imageSystemPrompt = "You are a high-fidelity image composition AI. The output MUST be a premium, high-quality, ultra-stable 9:16 vertical image. Clean visuals, NO text, NO watermarks, NO overlays. ";
+                
+                // KUNCI PRODUK: Preserve the product in the FIRST input image exactly (shape, color, packaging, logo, texture) and place it realistically into the new scene.
+                imageSystemPrompt += "KUNCI PRODUK: Preserve the product in the FIRST input image exactly (shape, color, packaging, logo, texture) and place it realistically into the new scene. NO modifications to the product at all. ";
+
+                // KUNCI KARAKTER: The model's facial identity MUST be 100% consistent with the SECOND input image (the model reference). Do not change face structure or expression.
+                if (modelBase64) {
+                    imageSystemPrompt += "KUNCI KARAKTER: The model's facial identity MUST be 100% consistent with the SECOND input image (the model reference). Do not change face structure or expression.";
+                }
+                
+                
+                for (let i = 0; i < sceneContexts.length; i++) {
+                    const scene = sceneContexts[i];
+                    
+                    const sceneUserQuery = `Generate the 9:16 UGC scene: ${scene.visual_prompt}. The scene must include the product and follow the action/context: ${desc}`;
+                    
+                    const imageParts = [];
+                    // Product Image is mandatory and always FIRST for consistency
+                    imageParts.push({ inlineData: { mimeType: "image/png", data: productBase64 } });
+                    
+                    // Model Image (if provided) is SECOND
+                    if (modelBase64) {
+                        imageParts.push({ inlineData: { mimeType: "image/png", data: modelBase64 } });
+                    }
+                    
+                    let currentImageUrl = '';
+                    
+                    // Update UI to show current scene being processed (Prepend loading indicator)
+                    outputEl.innerHTML = `
+                        <div class="text-xl font-bold text-cyan-400">Membuat Adegan ${i + 1} dari ${sceneContexts.length}...</div>
+                        <div class="text-gray-400 text-sm italic mb-4">Konsep Visual: ${scene.visual_prompt}</div>
+                        <div id="ugc-scene-output-${i}" class="aspect-9-16 w-1/2 mx-auto mb-6 flex items-center justify-center">
+                            <div class="loading-ring"></div>
+                        </div>
+                    ` + fullHtml;	
+                    
+                    // Use Gemini Image Edit for I2I and Face/Product lock
+                    const imageGenPayload = {
+                        contents: [{ role: "user", parts: [{ text: sceneUserQuery }, ...imageParts] }],
+                        systemInstruction: { parts: [{ text: imageSystemPrompt }] },
+                        generationConfig: {
+                            responseModalities: ['IMAGE'],
+                            sampleCount: 1,
+                            aspectRatio: '9:16',
+                        }
+                    };
+                    const imageResult = await fetchWithExponentialBackoff(GEMINI_IMAGE_EDIT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(imageGenPayload)
+                    });
+                    const base64Data = imageResult?.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                    if (base64Data) {
+                        currentImageUrl = `data:image/png;base64,${base64Data}`;
+                    }
+
+
+                    if (currentImageUrl) {
+                        // Prepend the successfully generated scene
+                        fullHtml = `
+                            <div class="space-y-2 mb-6 border-b border-gray-700/50 pb-4">
+                                <div class="text-xl font-bold text-cyan-400">Adegan ${i + 1} Selesai</div>
+                                <div class="text-gray-400 text-sm italic mb-2 hidden">Konsep: ${scene.visual_prompt}</div>	
+                                <div class="output-container">
+                                    <div class="aspect-9-16 w-full group relative">
+                                        <img src="${currentImageUrl}" alt="UGC Scene ${i + 1}" class="object-cover"/>
+                                        <div class="content-placeholder absolute inset-0 flex items-end justify-center opacity-0 group-hover:opacity-100 transition duration-300 bg-black bg-opacity-30">
+                                            <button onclick="downloadImage('${currentImageUrl}', 'UGC_Scene${i + 1}_9x16.png')" class="ai-button mb-4 px-4 py-2 text-sm rounded-full">
+                                                Download
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ` + fullHtml;
+                        outputEl.innerHTML = fullHtml; // Update output area with all completed scenes
+
+                    } else {
+                        throw new Error(`Gagal membuat gambar untuk Adegan ${i + 1}. Respon kosong.`);
+                    }
+                }
+                
+                // Step 3: Generate Promotional Narrative (Text Call) - UPDATED PROMPT HERE
+                const narrativeSystemPrompt = `Act as a highly engaging UGC TikTok copywriter. Generate a cohesive, product-specific promotional text in **Indonesian** following this strict 6-point storytelling structure, ensuring the narrative matches the given product category and description. 1. Hook (Attention-grabbing opening). 2. Explanation (Briefly describe the product visible in the image). 3. Main Benefits (Highlight 2-3 key advantages relevant to the product type, based on implied usage). 4. Usage (Simple description of how it's applied/used, based on the implied action). 5. Natural Testimonial (A short, relatable personal endorsement). 6. Call to Action (Simple, direct instruction). The final output MUST be a single block of text containing all 6 points without numbering or separators, ready for a video overlay (though the generated images are clean). The tone must be enthusiastic and relatable.`;
+                const narrativeUserQuery = `Buatkan narasi promosi UGC 6-poin untuk produk: ${desc} (Kategori: ${category}, Gaya: ${style}).`;
+
+                const narrativePayload = {
+                    contents: [{ parts: [{ text: narrativeUserQuery }] }],
+                    systemInstruction: { parts: [{ text: narrativeSystemPrompt }] },
+                };
+
+                const narrativeResult = await fetchWithExponentialBackoff(GEMINI_TEXT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(narrativePayload)
+                });
+
+                const narrativeText = narrativeResult.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (narrativeText) {
+                    narrativeTextEl.innerText = narrativeText.trim();
+                    narrativeContainerEl.classList.remove('hidden');
+                    lucide.createIcons(); // Re-render icon
+                }
+
+                toggleLoading(toolPrefix, false);
+                showMessage(`Berhasil membuat ${sceneContexts.length} adegan UGC premium 9:16 dan narasi!`, false);
+
+
+            } catch (error) {
+                toggleLoading(toolPrefix, false);
+                outputEl.innerHTML = '';
+                showMessage(error.message);
+            }
+        }
+
+
+        // --- GLOBAL DOWNLOAD UTILITY ---
+        function downloadImage(dataUrl, filename) {
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- CLIPBOARD UTILITY ---
+        function copyToClipboard(text) {
+            // Replaces hashtags with spaces if present
+            const cleanText = text.replace(/#/g, '');	
+            if (document.execCommand('copy')) {
+                const textarea = document.createElement('textarea');
+                textarea.value = cleanText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showMessage('Teks berhasil disalin ke clipboard!', false);
+            } else {
+                showMessage('Gagal menyalin. Fungsi clipboard tidak didukung.');
+            }
+        }
+
+    </script>
+</body>
+</html>
